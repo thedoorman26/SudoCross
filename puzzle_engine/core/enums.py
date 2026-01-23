@@ -9,3 +9,6 @@ class ParityState(Enum): # picross states
 class CellOrigin(Enum): # so GUI knows what can/can't be edited
     GIVEN = auto()      # should be uneditable
     USER = auto()
+
+class GridSize(Enum):
+    STANDARD = 9 # regular sudoku size

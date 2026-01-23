@@ -1,5 +1,5 @@
 from typing import Optional
-from .enums import ParityState, CellOrigin
+from puzzle_engine.core.enums import ParityState, CellOrigin
 
 
 class Cell:
