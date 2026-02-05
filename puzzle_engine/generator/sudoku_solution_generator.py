@@ -10,7 +10,6 @@ class SudokuSolutionGenerator:
         self.subgrid_size = grid.subgrid_size
 
     def generate(self) -> bool:
-        """Generate a complete valid Sudoku solution."""
         return self._fill_cell(0, 0)
 
     def _fill_cell(self, row: int, col: int) -> bool:
