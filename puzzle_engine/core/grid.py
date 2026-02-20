@@ -2,6 +2,7 @@ from typing import List
 from puzzle_engine.core.cell import Cell
 from puzzle_engine.core.enums import GridSize
 
+
 class Grid:
     def __init__(self, size: GridSize = GridSize.STANDARD):
         self.size = size
@@ -45,6 +46,8 @@ class Grid:
             row_values = []
             for c in range(self.dimension):
                 value = self.cells[r][c].value
-                row_values.append(str(value) if value is not None else ".")
+                row_values.append(
+                    str(value) if value is not None else "."
+                )
             rows.append(" ".join(row_values))
         return "\n".join(rows)

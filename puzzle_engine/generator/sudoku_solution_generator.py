@@ -48,19 +48,10 @@ class SudokuSolutionGenerator:
         )
 
     def _valid_in_row(self, row: int, value: int) -> bool:
-        return all(
-            cell.value != value
-            for cell in self.grid.get_row(row)
-        )
+        return all(cell.value != value for cell in self.grid.get_row(row))
 
     def _valid_in_column(self, col: int, value: int) -> bool:
-        return all(
-            cell.value != value
-            for cell in self.grid.get_column(col)
-        )
+        return all(cell.value != value for cell in self.grid.get_column(col))
 
     def _valid_in_subgrid(self, row: int, col: int, value: int) -> bool:
-        return all(
-            cell.value != value
-            for cell in self.grid.get_subgrid(row, col)
-        )
+        return all(cell.value != value for cell in self.grid.get_subgrid(row, col))

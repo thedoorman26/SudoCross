@@ -44,7 +44,4 @@ def derive_picross_clues(grid: Grid) -> Dict[str, List[List[int]]]:
         column = [parity_grid[r][c] for r in range(size)]
         col_clues.append(_derive_line_clues(column))
 
-    return {
-        "rows": row_clues,
-        "columns": col_clues
-    }
+    return {"rows": row_clues, "columns": col_clues}
