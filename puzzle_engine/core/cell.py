@@ -37,5 +37,11 @@ class Cell:
         self.origin = None
         self.parity_state = ParityState.UNKNOWN
 
+    def clear_if_user_entered(self):
+        if self.origin == CellOrigin.USER:
+            self.value = None
+            self.origin = None
+            self.parity_state = ParityState.UNKNOWN
+
     def is_empty(self) -> bool:
         return self.value is None
