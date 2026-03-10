@@ -27,9 +27,6 @@ class SudokuApp:
 
         self._show_main_menu()
 
-    # ----------------------------
-    # Screen management
-    # ----------------------------
     def _clear_root(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -96,9 +93,6 @@ class SudokuApp:
         self._generate_new_puzzle(clues=self.current_clues)
         self._build_layout(parent=self.game_frame)
 
-    # ----------------------------
-    # Puzzle generation
-    # ----------------------------
     def _generate_new_puzzle(self, clues: int):
         self.grid_model = Grid()
 
@@ -132,9 +126,6 @@ class SudokuApp:
                 ParityState.FILLED if cell.value % 2 == 0 else ParityState.EMPTY
             )
 
-    # ----------------------------
-    # UI build
-    # ----------------------------
     def _build_layout(self, parent):
         # ---- Column Clues (Top) ----
         for c in range(9):
@@ -233,9 +224,6 @@ class SudokuApp:
             disabledforeground="black",
         )
 
-    # ----------------------------
-    # User interactions
-    # ----------------------------
     def _cycle_parity(self, row, col):
         entry = self.entries[row][col]
         if entry["state"] == "disabled":
@@ -275,7 +263,6 @@ class SudokuApp:
         )
 
     def _update_model_from_ui(self):
-        # Pull sudoku values from Entry widgets into the grid model.
         for r in range(9):
             for c in range(9):
                 cell = self.grid_model.get_cell(r, c)
@@ -292,36 +279,111 @@ class SudokuApp:
                     self._update_cell_display(r, c)
                     continue
 
-                if not raw.isdigit():
-                    entry.delete(0, tk.END)
-                    cell.clear_value()
-                    self._update_cell_display(r, c)
-                    continue
-
-                value = int(raw)
-                try:
-                    cell.set_value(value, CellOrigin.USER)
-                except ValueError:
-                    entry.delete(0, tk.END)
-                    cell.clear_value()
+                if raw.isdigit() and len(raw) == 1 and 1 <= int(raw) <= 9:
+                    cell.set_value(int(raw), CellOrigin.USER)
+                else:
+                    # Leave the entry alone visually/text-wise,
+                    # but don't treat it as a valid model value.
+                    if cell.value is not None or cell.origin is not None:
+                        cell.clear_value()
 
                 self._update_cell_display(r, c)
 
-    # ----------------------------
-    # Validate / reset / tutorial
-    # ----------------------------
+    def _find_invalid_input(self):
+        for r in range(9):
+            for c in range(9):
+                cell = self.grid_model.get_cell(r, c)
+
+                if cell.origin == CellOrigin.GIVEN:
+                    continue
+
+                raw = self.entries[r][c].get().strip()
+
+                if raw == "":
+                    continue
+
+                if not (raw.isdigit() and len(raw) == 1 and 1 <= int(raw) <= 9):
+                    return (r, c, f"Invalid input at row {r+1}, column {c+1}. Use a single digit 1-9.")
+
+        return None    
+    
+    def _find_sudoku_error(self):
+        for r in range(9):
+            for c in range(9):
+                cell = self.grid_model.get_cell(r, c)
+
+                if cell.value is None:
+                    continue
+
+                value = cell.value
+
+                # Check row
+                for other_c in range(9):
+                    if other_c != c and self.grid_model.get_cell(r, other_c).value == value:
+                        return (r, c, f"Sudoku error at row {r+1}, column {c+1}: duplicate {value} in the row.")
+
+                # Check column
+                for other_r in range(9):
+                    if other_r != r and self.grid_model.get_cell(other_r, c).value == value:
+                        return (r, c, f"Sudoku error at row {r+1}, column {c+1}: duplicate {value} in the column.")
+
+                # Check subgrid
+                for other_cell in self.grid_model.get_subgrid(r, c):
+                    if (other_cell.row != r or other_cell.col != c) and other_cell.value == value:
+                        return (r, c, f"Sudoku error at row {r+1}, column {c+1}: duplicate {value} in the 3x3 box.")
+
+        return None
+
+    def _find_picross_error(self):
+        for r in range(9):
+            for c in range(9):
+                cell = self.grid_model.get_cell(r, c)
+
+                if cell.value is None:
+                    continue
+
+                true_parity = (
+                    ParityState.FILLED if cell.value % 2 == 0 else ParityState.EMPTY
+                )
+
+                if cell.parity_state != true_parity:
+                    return (r, c, f"Parity error at row {r+1}, column {c+1}: marking does not match the number.")
+
+        return None
+
     def _validate(self):
         self._update_model_from_ui()
 
-        sudoku_valid = SudokuValidator(self.grid_model).is_valid()
-        picross_complete = PicrossValidator(self.grid_model).is_complete()
+        invalid_input = self._find_invalid_input()
+        if invalid_input:
+            _, _, message = invalid_input
+            messagebox.showerror("Invalid Input", message)
+            return
 
-        all_filled = all(cell.value is not None for cell in self.grid_model.all_cells())
+        sudoku_error = self._find_sudoku_error()
+        if sudoku_error:
+            _, _, message = sudoku_error
+            messagebox.showerror("Sudoku Error", message)
+            return
 
-        if sudoku_valid and picross_complete and all_filled:
-            messagebox.showinfo("Success", "Puzzle completed correctly!")
-        else:
-            messagebox.showerror("Invalid", "Puzzle is incomplete or violates rules.")
+        picross_error = self._find_picross_error()
+        if picross_error:
+            _, _, message = picross_error
+            messagebox.showerror("Parity Error", message)
+            return
+
+        all_filled = all(
+            cell.value is not None for cell in self.grid_model.all_cells()
+        )
+
+        if not all_filled:
+            messagebox.showerror(
+                "Incomplete",
+                "The puzzle is not finished yet."
+            )
+            return
+
+        messagebox.showinfo("Success", "Puzzle completed correctly!")
 
     def _reset(self):
         # Rebuild game screen with same difficulty
