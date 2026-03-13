@@ -386,7 +386,7 @@ class SudokuApp:
         messagebox.showinfo("Success", "Puzzle completed correctly!")
 
     def _reset(self):
-        # Rebuild game screen with same difficulty
+        # Rebuild game screen with same difficulty 
         self._clear_root()
         self.game_frame = tk.Frame(self.root)
         self.game_frame.pack()
