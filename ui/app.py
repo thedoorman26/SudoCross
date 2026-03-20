@@ -96,28 +96,28 @@ class SudokuApp:
     def _generate_new_puzzle(self, clues: int):
         self.grid_model = Grid()
 
-        # 1) Create full solved Sudoku (all GIVEN)
+        #create full solved Sudoku (all GIVEN)
         solution_gen = SudokuSolutionGenerator(self.grid_model)
         solution_gen.generate()
 
-        # 2) Initialize parity state for GIVEN cells (based on value parity)
+        #initialize parity state for GIVEN cells (based on value parity)
         self._initialize_parity_states()
 
-        # 3) Copy solved grid and derive Picross clues from solution parity pattern
+        #copy solved grid and derive Picross clues from solution parity pattern
         solution_copy = copy.deepcopy(self.grid_model)
         self.picross_clues = derive_picross_clues(solution_copy)
 
-        # 4) Remove values to create playable Sudoku puzzle
+        #remove values to create playable Sudoku puzzle
         puzzle_gen = SudokuPuzzleGenerator(self.grid_model, clues=clues)
         puzzle_gen.generate()
 
-        # Debug (optional)
-        # print("\n=== SOLUTION (DEBUG) ===")
-        # print(solution_copy)
-        # print("========================\n")
+        #debug (optional)
+        #print("\n=== SOLUTION (DEBUG) ===")
+        #print(solution_copy)
+        #print("========================\n")
 
     def _initialize_parity_states(self):
-        # Initialize parity only for GIVEN clue cells
+        # initialize parity only for GIVEN clue cells
         for cell in self.grid_model.all_cells():
             if cell.origin != CellOrigin.GIVEN:
                 continue
