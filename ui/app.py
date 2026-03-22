@@ -170,7 +170,10 @@ class SudokuApp:
                     lambda event, row=r, col=c: self._cycle_parity(row, col),
                 )
 
-                entry.grid(row=r + 1, column=c + 2, padx=1, pady=1)
+                padx = (3 if c % 3 == 0 else 1, 3 if c % 3 == 2 else 1)
+                pady = (3 if r % 3 == 0 else 1, 3 if r % 3 == 2 else 1)
+
+                entry.grid(row=r + 1, column=c + 2, padx=padx, pady=pady)
 
                 cell = self.grid_model.get_cell(r, c)
 
