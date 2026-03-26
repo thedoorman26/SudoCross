@@ -9,7 +9,7 @@ class SudokuPuzzleGenerator:
         self.clues = clues
 
     def generate(self):
-        all_cells = self.grid.all_cells()
+        all_cells = self.grid.all_cells() 
         random.shuffle(all_cells)
 
         cells_to_clear = len(all_cells) - self.clues

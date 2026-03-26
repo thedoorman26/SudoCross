@@ -3,7 +3,7 @@ from puzzle_engine.core.enums import ParityState
 
 
 class PicrossValidator:
-    def __init__(self, grid: Grid):
+    def __init__(self, grid: Grid): 
         self.grid = grid
         self.size = grid.dimension
 

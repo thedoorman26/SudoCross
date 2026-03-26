@@ -7,7 +7,7 @@ class Grid:
     def __init__(self, size: GridSize = GridSize.STANDARD):
         self.size = size
         self.dimension = size.value  # should be 9
-        self.subgrid_size = int(self.dimension ** 0.5)
+        self.subgrid_size = int(self.dimension ** 0.5) 
 
         self.cells: List[List[Cell]] = [
             [Cell(row, col) for col in range(self.dimension)]

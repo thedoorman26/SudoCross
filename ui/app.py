@@ -178,7 +178,7 @@ class SudokuApp:
                 cell = self.grid_model.get_cell(r, c)
 
                 if cell.value is not None:
-                    entry.insert(0, str(cell.value))
+                    entry.insert(0, str(cell.value)) 
 
                 # GIVEN cells: color by parity and lock editing
                 if cell.origin == CellOrigin.GIVEN:

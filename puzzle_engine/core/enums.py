@@ -13,4 +13,4 @@ class CellOrigin(Enum):  # so GUI knows what can/can't be edited
 
 
 class GridSize(Enum):
-    STANDARD = 9  # regular sudoku size
+    STANDARD = 9  # regular sudoku size 

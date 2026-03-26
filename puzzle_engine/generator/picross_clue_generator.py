@@ -12,7 +12,7 @@ def _derive_line_clues(cells: List[bool]) -> List[int]:
         else:
             if run_length > 0:
                 clues.append(run_length)
-                run_length = 0
+                run_length = 0 
 
     if run_length > 0:
         clues.append(run_length)

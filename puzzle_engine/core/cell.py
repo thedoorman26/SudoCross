@@ -15,7 +15,7 @@ class Cell:
         )  # picross stuff
 
     def set_value(self, value: int, origin: CellOrigin):
-        if self.origin == CellOrigin.GIVEN:
+        if self.origin == CellOrigin.GIVEN: 
             raise ValueError(
                 f"Cannot change a given cell at ({self.row},{self.col})"
             )

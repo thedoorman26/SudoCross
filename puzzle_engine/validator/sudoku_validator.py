@@ -4,7 +4,7 @@ from puzzle_engine.core.grid import Grid
 class SudokuValidator:
     def __init__(self, grid: Grid):
         self.grid = grid
-        self.size = grid.dimension
+        self.size = grid.dimension 
 
     def is_valid(self) -> bool:
         for i in range(self.size):
