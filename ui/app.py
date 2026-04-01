@@ -11,7 +11,7 @@ from puzzle_engine.validator.sudoku_validator import SudokuValidator
 from puzzle_engine.validator.picross_validator import PicrossValidator
 
 
-class SudokuApp:
+class SudoCross:
     def __init__(self, root):
         self.root = root
         self.root.title("SudoCross")

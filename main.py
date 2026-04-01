@@ -7,11 +7,11 @@ from puzzle_engine.generator.picross_clue_generator import derive_picross_clues
 from puzzle_engine.validator.sudoku_validator import SudokuValidator
 from puzzle_engine.validator.picross_validator import PicrossValidator
 from tkinter import Tk
-from ui.app import SudokuApp
+from ui.app import SudoCross
 
 def main():
     root = Tk()
-    app = SudokuApp(root)
+    app = SudoCross(root)
     root.mainloop()
 
 if __name__ == "__main__":
