@@ -17,13 +17,13 @@ class SudokuApp:
         self.root.title("SudoCross")
         self.root.minsize(400, 400)
 
-        self.grid_model = None          # underlying puzzle state (Grid)
-        self.picross_clues = None       # {"rows": [...], "columns": [...]}
-        self.entries = []               # 2D list of Entry widgets
+        self.grid_model = None  # puzzle data
+        self.picross_clues = None  # row/column clues
+        self.entries = []  # entry widgets
 
         self.menu_frame = None
         self.game_frame = None
-        self.current_clues = 30         # default; menu overwrites
+        self.current_clues = 30  # default difficulty
 
         self._show_main_menu()
 
@@ -96,28 +96,22 @@ class SudokuApp:
     def _generate_new_puzzle(self, clues: int):
         self.grid_model = Grid()
 
-        #create full solved Sudoku (all GIVEN)
-        solution_gen = SudokuSolutionGenerator(self.grid_model)
+        solution_gen = SudokuSolutionGenerator(self.grid_model)  # build full solution
         solution_gen.generate()
 
-        #initialize parity state for GIVEN cells (based on value parity)
-        self._initialize_parity_states()
+        self._initialize_parity_states()  # mark given parity
 
-        #copy solved grid and derive Picross clues from solution parity pattern
-        solution_copy = copy.deepcopy(self.grid_model)
-        self.picross_clues = derive_picross_clues(solution_copy)
+        solution_copy = copy.deepcopy(self.grid_model)  # save solved copy
+        self.picross_clues = derive_picross_clues(solution_copy)  # make clue lists
 
-        #remove values to create playable Sudoku puzzle
-        puzzle_gen = SudokuPuzzleGenerator(self.grid_model, clues=clues)
+        puzzle_gen = SudokuPuzzleGenerator(self.grid_model, clues=clues)  # remove numbers
         puzzle_gen.generate()
 
-        #debug (optional)
-        #print("\n=== SOLUTION (DEBUG) ===")
-        #print(solution_copy)
-        #print("========================\n")
+        # print("\n=== SOLUTION (DEBUG) ===")
+        # print(solution_copy)
+        # print("========================\n")
 
     def _initialize_parity_states(self):
-        # initialize parity only for GIVEN clue cells
         for cell in self.grid_model.all_cells():
             if cell.origin != CellOrigin.GIVEN:
                 continue
@@ -127,7 +121,6 @@ class SudokuApp:
             )
 
     def _build_layout(self, parent):
-        # ---- Column Clues (Top) ----
         for c in range(9):
             clues = self.picross_clues["columns"][c]
             clue_text = "\n".join(str(n) for n in clues)
@@ -140,11 +133,9 @@ class SudokuApp:
             )
             label.grid(row=0, column=c + 2, padx=5, pady=5)
 
-        # ---- Sudoku Grid + Row Clues ----
         for r in range(9):
             row_entries = []
 
-            # Row Picross clues on left
             row_clue = self.picross_clues["rows"][r]
             row_clue_text = " ".join(str(n) for n in row_clue)
 
@@ -164,13 +155,12 @@ class SudokuApp:
                     justify="center",
                 )
 
-                # Double-click cycles parity marking
                 entry.bind(
                     "<Double-Button-1>",
                     lambda event, row=r, col=c: self._cycle_parity(row, col),
-                )
+                )  # cycle parity mark
 
-                padx = (3 if c % 3 == 0 else 1, 3 if c % 3 == 2 else 1)
+                padx = (3 if c % 3 == 0 else 1, 3 if c % 3 == 2 else 1)  # box spacing
                 pady = (3 if r % 3 == 0 else 1, 3 if r % 3 == 2 else 1)
 
                 entry.grid(row=r + 1, column=c + 2, padx=padx, pady=pady)
@@ -178,12 +168,11 @@ class SudokuApp:
                 cell = self.grid_model.get_cell(r, c)
 
                 if cell.value is not None:
-                    entry.insert(0, str(cell.value)) 
+                    entry.insert(0, str(cell.value))  # show givens
 
-                # GIVEN cells: color by parity and lock editing
                 if cell.origin == CellOrigin.GIVEN:
                     self._apply_initial_parity_color(cell, entry)
-                    entry.config(state="disabled")
+                    entry.config(state="disabled")  # lock givens
                 else:
                     entry.config(
                         bg="white",
@@ -195,7 +184,6 @@ class SudokuApp:
 
             self.entries.append(row_entries)
 
-        # ---- Control buttons ----
         validate_button = tk.Button(
             parent,
             text="Validate",
@@ -234,7 +222,6 @@ class SudokuApp:
 
         cell = self.grid_model.get_cell(row, col)
 
-        # Cycle UNKNOWN → FILLED → EMPTY → UNKNOWN
         if cell.parity_state == ParityState.UNKNOWN:
             cell.parity_state = ParityState.FILLED
         elif cell.parity_state == ParityState.FILLED:
@@ -242,15 +229,14 @@ class SudokuApp:
         else:
             cell.parity_state = ParityState.UNKNOWN
 
-        self._update_cell_display(row, col)
+        self._update_cell_display(row, col)  # refresh color
 
     def _update_cell_display(self, row, col):
         entry = self.entries[row][col]
         cell = self.grid_model.get_cell(row, col)
 
-        # Don't restyle givens here (they are styled once and disabled)
         if cell.origin == CellOrigin.GIVEN:
-            return
+            return  # leave givens alone
 
         if cell.parity_state == ParityState.FILLED:
             color = "#4CBB17"
@@ -283,12 +269,10 @@ class SudokuApp:
                     continue
 
                 if raw.isdigit() and len(raw) == 1 and 1 <= int(raw) <= 9:
-                    cell.set_value(int(raw), CellOrigin.USER)
+                    cell.set_value(int(raw), CellOrigin.USER)  # store user input
                 else:
-                    # Leave the entry alone visually/text-wise,
-                    # but don't treat it as a valid model value.
                     if cell.value is not None or cell.origin is not None:
-                        cell.clear_value()
+                        cell.clear_value()  # ignore bad input in model
 
                 self._update_cell_display(r, c)
 
@@ -308,8 +292,8 @@ class SudokuApp:
                 if not (raw.isdigit() and len(raw) == 1 and 1 <= int(raw) <= 9):
                     return (r, c, f"Invalid input at row {r+1}, column {c+1}. Use a single digit 1-9.")
 
-        return None    
-    
+        return None
+
     def _find_sudoku_error(self):
         for r in range(9):
             for c in range(9):
@@ -320,17 +304,14 @@ class SudokuApp:
 
                 value = cell.value
 
-                # Check row
                 for other_c in range(9):
                     if other_c != c and self.grid_model.get_cell(r, other_c).value == value:
                         return (r, c, f"Sudoku error at row {r+1}, column {c+1}: duplicate {value} in the row.")
 
-                # Check column
                 for other_r in range(9):
                     if other_r != r and self.grid_model.get_cell(other_r, c).value == value:
                         return (r, c, f"Sudoku error at row {r+1}, column {c+1}: duplicate {value} in the column.")
 
-                # Check subgrid
                 for other_cell in self.grid_model.get_subgrid(r, c):
                     if (other_cell.row != r or other_cell.col != c) and other_cell.value == value:
                         return (r, c, f"Sudoku error at row {r+1}, column {c+1}: duplicate {value} in the 3x3 box.")
@@ -355,7 +336,7 @@ class SudokuApp:
         return None
 
     def _validate(self):
-        self._update_model_from_ui()
+        self._update_model_from_ui()  # sync entries to model
 
         invalid_input = self._find_invalid_input()
         if invalid_input:
@@ -389,8 +370,7 @@ class SudokuApp:
         messagebox.showinfo("Success", "Puzzle completed correctly!")
 
     def _reset(self):
-        # Rebuild game screen with same difficulty 
-        self._clear_root()
+        self._clear_root()  # rebuild current game
         self.game_frame = tk.Frame(self.root)
         self.game_frame.pack()
 
